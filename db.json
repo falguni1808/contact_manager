@@ -1,0 +1,60 @@
+{
+  "contacts": [
+    {
+      "id": "1",
+      "name": "John Doe",
+      "email": "john@example.com",
+      "phone": "1234567890",
+      "address": "123 Street",
+      "favourite": true
+    },
+    {
+      "id": "2",
+      "name": "Jane Smith",
+      "email": "jane@example.com",
+      "phone": "9876543210",
+      "address": "456 Avenue",
+      "favourite": false
+    },
+    {
+      "name": "fd",
+      "email": "falguni@gmail.com",
+      "phone": "1111111188",
+      "address": "abcd",
+      "favourite": true,
+      "id": "061b"
+    },
+    {
+      "name": "newMybrand",
+      "email": "shubhanshu.pandey@gmail.com",
+      "phone": "1234567898",
+      "address": "address abcd",
+      "id": "b12e",
+      "favourite": true
+    },
+    {
+      "id": "293a",
+      "name": "rcsWebhookQueue",
+      "email": "demo@minimals.cc",
+      "phone": "1111111111",
+      "address": "address",
+      "favourite": true
+    },
+    {
+      "id": "1808",
+      "name": "RABBIT_MQ_INSTANCE",
+      "email": "demo@minimals.cc",
+      "phone": "1111111111",
+      "address": "address",
+      "favourite": true
+    },
+    {
+      "name": "vaishnavi",
+      "email": "vaishnavi@gmail.com",
+      "phone": "1234567898",
+      "address": "address",
+      "favourite": true,
+      "id": "IZbumW3"
+    }
+  ]
+}
