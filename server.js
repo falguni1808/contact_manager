@@ -5,7 +5,6 @@ const middlewares = jsonServer.defaults();
 
 server.use(middlewares);
 
-// 👇 Expose X-Total-Count header to browser
 server.use((req, res, next) => {
   res.header('Access-Control-Expose-Headers', 'X-Total-Count');
   next();
