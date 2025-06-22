@@ -117,7 +117,6 @@ export default function ContactFormPage() {
           </Typography>
         </Box>
 
-        {/* Form */}
 
         <Box
           component="form"
