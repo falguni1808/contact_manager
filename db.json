@@ -111,14 +111,6 @@
       "phone": "8776655442",
       "address": "369 Cypress Lane, San Diego, CA",
       "favourite": false
-    },
-    {
-      "name": "RABBIT_MQ_INSTANCE",
-      "email": "shubhanshu.pandey@gmail.com",
-      "phone": "1234567898",
-      "address": "abcd",
-      "favourite": true,
-      "id": "2OFMtdU"
     }
   ]
 }
