@@ -13,19 +13,26 @@ import {
   Box,
   Stack,
 } from '@mui/material';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 
 export default function ContactModal() {
+
+  const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const queryClient = useQueryClient();
   const router = useRouter();
+
   const {
     selectedContact,
     clearSelectedContact,
     setEditContactData,
   } = useContactStore();
 
-  const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
-  const [isRedirecting, setIsRedirecting] = useState(false);
+  const handleEdit = useCallback(() => {
+    setIsRedirecting(true);
+    setEditContactData(selectedContact);
+    router.push('/contacts/add?mode=edit');
+  }, [router, selectedContact, setEditContactData]);
 
   const del = useMutation({
     mutationFn: () => deleteContact(selectedContact.id),
@@ -36,19 +43,13 @@ export default function ContactModal() {
     },
   });
 
-  const handleDelete = () => {
-    setOpenConfirmDelete(true); // open confirmation dialog
-  };
+  const handleDelete = useCallback(() => {
+    setOpenConfirmDelete(true);
+  }, []);
 
-  const confirmDelete = () => {
+  const confirmDelete = useCallback(() => {
     del.mutate();
-  };
-
-  const handleEdit = () => {
-    setIsRedirecting(true); // show loader/spinner on button
-    setEditContactData(selectedContact);
-    router.push('/contacts/add?mode=edit');
-  };
+  }, [del]);
 
   if (!selectedContact) return null;
 
@@ -115,7 +116,7 @@ export default function ContactModal() {
           <Button
             variant="contained"
             onClick={handleEdit}
-            disabled={isRedirecting} // Disable while loading
+            disabled={isRedirecting}
             sx={{
               bgcolor: '#5c6ac4',
               color: '#fff',
@@ -134,14 +135,14 @@ export default function ContactModal() {
             onClick={clearSelectedContact}
             variant="contained"
             sx={{
-              bgcolor: '#5c6ac4', // primary blue (base)
+              bgcolor: '#5c6ac4',
               color: '#fff',
               textTransform: 'none',
               fontWeight: 500,
               minWidth: 100,
-              bgcolor: '#5c6ac4', // primary blue (base)
+              bgcolor: '#5c6ac4',
               '&:hover': {
-                bgcolor: '#3f51b5', // 👈 hover = slightly darker blue
+                bgcolor: '#3f51b5',
               },
             }}
           >
@@ -150,7 +151,7 @@ export default function ContactModal() {
         </DialogActions>
       </Dialog>
 
-      {/* ✅ Confirm Delete Dialog */}
+      {/*  Confirm Delete Dialog */}
       <Dialog open={openConfirmDelete} onClose={() => setOpenConfirmDelete(false)}>
         <DialogTitle
           sx={{ bgcolor: '#fef3c7', color: '#92400e', textAlign: 'center', fontWeight: 600 }}

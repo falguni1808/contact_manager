@@ -1,8 +1,8 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchContacts, toggleFavourite } from '@/lib/api';
-import Link from 'next/link';
+// import Link from 'next/link';
 import {
   Typography,
   List,
@@ -19,12 +19,16 @@ import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import ContactModal from '@/components/ContactModal';
 import { useContactStore } from '@/lib/zustandStore';
+import { useRouter } from 'next/navigation';
 
 export default function ContactsPage() {
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  const queryClient = useQueryClient();
 
+  const router = useRouter();
   const {
     showFavouritesOnly,
     toggleFavouritesOnly,
@@ -32,7 +36,17 @@ export default function ContactsPage() {
     setSelectedContact,
     clearSelectedContact,
   } = useContactStore();
-  const queryClient = useQueryClient();
+
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['contacts', page, search, showFavouritesOnly],
+    queryFn: () => fetchContacts(page, search, showFavouritesOnly),
+    keepPreviousData: true,
+  });
+
+  const handleToggleFavourite = useCallback(async (contact) => {
+    await toggleFavourite(contact);
+    queryClient.invalidateQueries(['contacts']);
+  }, [queryClient]);
 
   useEffect(() => {
     const debounce = setTimeout(() => {
@@ -46,18 +60,11 @@ export default function ContactsPage() {
     clearSelectedContact();
   }, []);
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ['contacts', page, search, showFavouritesOnly],
-    queryFn: () => fetchContacts(page, search, showFavouritesOnly),
-    keepPreviousData: true,
-  });
-
-  const handleToggleFavourite = async (contact) => {
-    await toggleFavourite(contact);
-    queryClient.invalidateQueries(['contacts']);
+  const handleClick = () => {
+    setIsRedirecting(true);
+    router.push('/contacts/add');
   };
-
-  const totalPages = data?.totalPages || 1;
+  const totalPages = useMemo(() => data?.totalPages || 1, [data]);
 
   return (
     <Box
@@ -108,7 +115,7 @@ export default function ContactsPage() {
         </Box>
 
         {/* Contact List */}
-        
+
         <Box sx={{ flex: 1, overflowY: 'auto', p: 2, bgcolor: '#f7fafc' }}>
           {isLoading ? (
             <Box display="flex" justifyContent="center" mt={4}>
@@ -166,48 +173,57 @@ export default function ContactsPage() {
             </Typography>
           )}
         </Box>
-
-        {/* Pagination */}
         <Box
           sx={{
             p: 1,
             borderTop: '1px solid #e2e8f0',
             bgcolor: '#eef1f7',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
             mt: 2,
           }}
         >
-          <Button
-            size="small"
-            onClick={() => setPage((prev) => prev - 1)}
-            disabled={page === 1}
-            sx={{
-              textTransform: 'none',
-              color: '#5c6ac4',
-              fontWeight: 500,
-              '&:disabled': { color: '#c7c7d2' },
-            }}
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+            spacing={2}
+            flexWrap="wrap"
           >
-            Previous
-          </Button>
-          <Typography variant="body2" color="#1e293b">
-            Page {page} of {totalPages}
-          </Typography>
-          <Button
-            size="small"
-            onClick={() => setPage((prev) => prev + 1)}
-            disabled={page === totalPages}
-            sx={{
-              textTransform: 'none',
-              color: '#5c6ac4',
-              fontWeight: 500,
-              '&:disabled': { color: '#c7c7d2' },
-            }}
-          >
-            Next
-          </Button>
+            <Button
+              size="small"
+              onClick={() => setPage((prev) => prev - 1)}
+              disabled={page === 1}
+              sx={{
+                textTransform: 'none',
+                color: 'blue',
+                fontWeight: 500,
+                '&:disabled': { color: '#c7c7d2' },
+              }}
+            >
+              ← Previous
+            </Button>
+
+            <Typography
+              variant="body2"
+              color="#1e293b"
+              sx={{ textAlign: 'center', flexGrow: 1 }}
+            >
+              Page {page} of {totalPages} | Total Records: {data?.totalCount || 0}
+            </Typography>
+
+            <Button
+              size="small"
+              onClick={() => setPage((prev) => prev + 1)}
+              disabled={page === totalPages}
+              sx={{
+                textTransform: 'none',
+                color: 'blue',
+                fontWeight: 500,
+                '&:disabled': { color: '#c7c7d2' },
+              }}
+            >
+              Next →
+            </Button>
+          </Stack>
         </Box>
 
         {/* Add Contact Button */}
@@ -217,12 +233,11 @@ export default function ContactsPage() {
             bgcolor: '#fff',
             borderTop: '1px solid #e2e8f0',
             display: 'flex',
-            justifyContent: 'center', 
+            justifyContent: 'center',
           }}
         >
           <Button
-            component={Link}
-            href="/contacts/add"
+            onClick={handleClick}
             variant="contained"
             sx={{
               px: 3,
@@ -233,19 +248,15 @@ export default function ContactsPage() {
               fontSize: '1rem',
               minWidth: 120,
               height: 40,
-              bgcolor: '#5c6ac4', // primary blue (base)
+              bgcolor: '#5c6ac4',
               '&:hover': {
-                bgcolor: '#3f51b5', // 👈 hover = slightly darker blue
+                bgcolor: '#3f51b5',
               },
             }}
           >
-            + Add Contact
+            {isRedirecting ? 'Loading...' : ' + Add Contact'}
           </Button>
-
         </Box>
-
-
-
         {selectedContact && <ContactModal />}
       </Paper>
     </Box>

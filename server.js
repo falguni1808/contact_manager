@@ -10,7 +10,7 @@ server.use((req, res, next) => {
   next();
 });
 
-server.use(router);
+server.use('/api',router);
 server.listen(3001, () => {
   console.log('JSON Server running on http://localhost:3001');
 });

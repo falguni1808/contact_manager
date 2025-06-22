@@ -12,8 +12,6 @@ import {
   Checkbox,
   FormControlLabel,
   Stack,
-  Snackbar,
-  Alert,
   CircularProgress,
 } from '@mui/material';
 import Link from 'next/link';
@@ -31,40 +29,44 @@ export default function ContactFormPage() {
 
   const { register, handleSubmit, formState: { errors }, setValue, reset } = useForm();
 
+  useEffect(() => {
+    if (mode === 'edit' && editContactData) {
+      Object.keys(editContactData).forEach((key) => setValue(key, editContactData[key]));
+      setIsLoadingForm(false);
+    }
+  }, [editContactData, mode]);
+
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: '',
     severity: 'success', // success | error | warning | info
   });
 
-
   const handleCloseSnackbar = () => {
     setSnackbar((prev) => ({ ...prev, open: false }));
 
   };
-
-  useEffect(() => {
-    if (mode === 'edit' && editContactData) {
-      Object.keys(editContactData).forEach((key) => setValue(key, editContactData[key]));
-      setIsLoadingForm(false); // ✅ Data loaded → stop loading
-    }
-  }, [editContactData, mode]);
-
   const mutation = useMutation({
     mutationFn: (data) =>
       mode === 'edit'
         ? updateContact(editContactData.id, data)
         : createContact(data),
     onSuccess: () => {
-      queryClient.invalidateQueries(['contacts']);
-      clearEditContactData();
-      reset();
-      setSnackbar({
-        open: true,
-        message: mode === 'edit' ? 'Contact updated successfully!' : 'Contact added successfully!',
-        severity: 'success',
-      });
-      router.push('/contacts');
+      try {
+        queryClient.invalidateQueries(['contacts']);
+        clearEditContactData();
+        reset();
+        setSnackbar({
+          open: true,
+          message: mode === 'edit' ? 'Contact updated successfully!' : 'Contact added successfully!',
+          severity: 'success',
+        });
+        router.push('/contacts');
+
+      } catch (error) {
+        console.log(error)
+      }
+
     },
   });
 
@@ -86,7 +88,6 @@ export default function ContactFormPage() {
   }
 
   return (
-
     <Box
       sx={{
         minHeight: '100vh',
@@ -115,6 +116,7 @@ export default function ContactFormPage() {
             {mode === 'edit' ? 'Edit Contact' : 'Add New Contact'}
           </Typography>
         </Box>
+
         {/* Form */}
 
         <Box
@@ -132,8 +134,8 @@ export default function ContactFormPage() {
           {snackbar.open && (
             <Box
               sx={{
-                bgcolor: snackbar.severity === 'success' ? '#d1fae5' : '#fee2e2', // light green / red
-                color: snackbar.severity === 'success' ? '#065f46' : '#991b1b', // dark green / red
+                bgcolor: snackbar.severity === 'success' ? '#d1fae5' : '#fee2e2',
+                color: snackbar.severity === 'success' ? '#065f46' : '#991b1b',
                 px: 3,
                 py: 1.5,
                 fontSize: '0.95rem',
@@ -171,7 +173,6 @@ export default function ContactFormPage() {
               sx={{
                 width: '100%',
                 maxWidth: 550,
-                // height:550,
                 p: 3,
                 borderRadius: 2,
                 boxShadow: 1,
@@ -244,12 +245,11 @@ export default function ContactFormPage() {
                     size="medium"
                     fullWidth
                     multiline
-                    minRows={1}         // 👈 sets minimum visible rows (adjust as needed)
-                    maxRows={3}         // optional
+                    minRows={1}
+                    maxRows={3}
                     InputProps={{ sx: { fontSize: '1rem' } }}
                     {...register('address', { required: 'Address is required' })}
                     error={!!errors.address}
-                  // helperText={errors.address?.message}
                   />
                   <Typography variant="caption" color="error">
                     {errors.address?.message}
@@ -282,16 +282,15 @@ export default function ContactFormPage() {
               sx={{
                 px: 3,
                 py: 1,
-                // bgcolor: 'blue',
                 color: '#fff',
                 textTransform: 'none',
                 fontWeight: 500,
                 fontSize: '1rem',
                 minWidth: 120,
                 height: 40,
-                bgcolor: '#5c6ac4', // primary blue (base)
+                bgcolor: '#5c6ac4',
                 '&:hover': {
-                  bgcolor: '#3f51b5', // 👈 hover = slightly darker blue
+                  bgcolor: '#3f51b5',
                 },
               }}
             >
@@ -310,9 +309,9 @@ export default function ContactFormPage() {
                 fontSize: '1rem',
                 minWidth: 120,
                 height: 40,
-                bgcolor: '#5c6ac4', 
+                bgcolor: '#5c6ac4',
                 '&:hover': {
-                  bgcolor: '#3f51b5', 
+                  bgcolor: '#3f51b5',
                 },
               }}
             >
